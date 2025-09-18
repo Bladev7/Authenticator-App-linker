@@ -8,12 +8,14 @@
 #include <ZXing/BitMatrixIO.h>
 #include <ZXing/MultiFormatWriter.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image_write.h>
 #include <stb_image.h>
 
 
 
 using namespace std;
+using namespace ZXing;
 
 string conv_toBase32(vector<unsigned char> key ) //Base32 Encoder 
 {
@@ -73,25 +75,57 @@ string TOTP_URI(const string Account ,const string Key ,const string AppName)
 	return URI;
 }
 
-void GenerateQRCode(const string & URI, const string & fileName, const int size )
+bool GenerateQRCode(const string & URI, const string & fileName, const int size )
 {
 	vector<unsigned char> pixels(size * size); //(height * width)
 
-	ZXing::MultiFormatWriter writer(ZXing::BarcodeFormat::QRCode); //creating a class Member that generate QRCode
-	ZXing::BitMatrix QRMatrix = writer.encode(URI,size,size); //encode the data into QR Code Matrix
-	ZXing::SaveAsPBM(QRMatrix, fileName ,4); //function take the QR code Matrix and save it as file
+	MultiFormatWriter writer(BarcodeFormat::QRCode); //creating a class Member that generate QRCode
+	BitMatrix QRMatrix = writer.encode(URI,size,size); //encode the data into QR Code Matrix
+	SaveAsPBM(QRMatrix, fileName ,4); //function take the QR code Matrix and save it as file
+
+	//converting pbm to png
+	int height, width , channel; //variables to read the image and passed in the function
+	unsigned char* img_check = stbi_load((fileName).c_str(), &width, &height, &channel, 1); //1 = grayscale in desired channel 
+	
+	//used c_str() function to convert string to const char for the function parameter
+	
+	
+	if (img_check) 
+	{
+		string pngName = fileName;
+		pngName.erase(pngName.size() - 4); //deleting the .pbm in the filename when converting it to png
+
+		// save as PNG
+		if (!stbi_write_png((pngName + ".png").c_str(), width, height, channel, img_check, width * channel)) //calling function and excute while checking if it saved secessfully
+		{
+			cerr << "Failed to save PNG file" << endl;
+			return false;
+		}
+
+		// free the image memory
+		stbi_image_free(img_check);
+		remove((fileName).c_str());
+	}
+
+	else if (!img_check)
+	{
+		cerr << "Failed to load pbm file " << endl; //using cerr to detect errors
+		return false;
+	}
+	return true;
 }
+
 
 int main()
 {
 	vector<unsigned char> secretKey = GenerateRandom();
 	string Encoded_secret = conv_toBase32(secretKey);
 	string URI = TOTP_URI("user@example.com" , "My2faApp", Encoded_secret);
-	GenerateQRCode(URI ,"C:\\Users\\user\\Documents\\2fa_qrcode3.pbm",200);
+	GenerateQRCode(URI ,"C:\\Users\\user\\Documents\\QRcode.pbm",200);
 	
 	cout << "2-Authentication App" << endl;
 	
 	
-
+	system("pause");  // waits for the user to press any key
 	return 0;
 }
