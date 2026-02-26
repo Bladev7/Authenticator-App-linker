@@ -1,4 +1,7 @@
 ﻿  Authentication App.cpp
+C:\Users\user\source\repos\Codewars test\Codewars test\Authentication App.cpp(155,7): warning C4311: 'type cast': pointer truncation from 'HINSTANCE' to 'int'
+C:\Users\user\source\repos\Codewars test\Codewars test\Authentication App.cpp(155,7): warning C4302: 'type cast': truncation from 'HINSTANCE' to 'int'
+C:\Users\user\source\repos\Codewars test\Codewars test\Authentication App.cpp(167,13): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
   Codewars test.vcxproj -> C:\Users\user\source\repos\Codewars test\Authentication App\x64\Debug\Authentication App.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.
